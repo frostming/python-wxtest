@@ -33,7 +33,7 @@ class GameFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.Bind(wx.EVT_TIMER, self.onTimer, self.timer)
         self.SetClientSize((w, h))
-        self.SetIcon(wx.Icon("snake.ico", wx.BITMAP_TYPE_ICO))
+        self.SetIcon(wx.Icon("icons/snake.ico", wx.BITMAP_TYPE_ICO))
         self.Center()
         self.Show()
 
@@ -179,5 +179,5 @@ class GameFrame(wx.Frame):
 
 if __name__ == "__main__":
     app = wx.App(False)
-    GameFrame(u"Snake v0.1 by Frost Ming", (10, 15))
+    GameFrame(u"Snake v0.1 by Frost Ming", (15, 10))
     app.MainLoop()
