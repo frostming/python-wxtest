@@ -12,6 +12,12 @@ import wx.grid
 import wx.lib.buttons as buttons
 
 
+def loadIcon(icon, w, h):
+    img = wx.Image(icon, wx.BITMAP_TYPE_ICO)
+    img.Rescale(w, h, wx.IMAGE_QUALITY_HIGH)
+    return img.ConvertToBitmap()
+
+
 class Frame(wx.Frame):
     def __init__(self, title):
         super(Frame, self).__init__(None, -1, title, size=(800, 600))
@@ -45,11 +51,11 @@ class Frame(wx.Frame):
         self.grid = Grid(self, self.keymap)
         rbox.Add(self.grid, 1, flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, border=3)
         bbox = wx.BoxSizer(wx.HORIZONTAL)
-        for label in ['add', 'delete', 'apply', 'saveas']:
-            bmp = wx.Bitmap('icons/%s.ico' % label)
+        for label in ['add', 'delete', 'apply', 'saveas', 'load']:
+            bmp = loadIcon('icons/%s.ico' % label, 15, 15)
             btn = buttons.GenBitmapButton(self, bitmap=bmp)
             btn.SetToolTipString(label.capitalize())
-            self.Bind(wx.EVT_BUTTON, getattr(self, 'on'+label.capitalize()), btn)
+            self.Bind(wx.EVT_BUTTON, getattr(self, 'on' + label.capitalize()), btn)
             bbox.Add(btn, 0, wx.ALIGN_CENTER | wx.RIGHT, 3)
         rbox.Insert(1, bbox, 0, wx.EXPAND | wx.ALL, 3)
         hbox.Add(rbox, 0, flag=wx.EXPAND | wx.ALL, border=3)
@@ -80,14 +86,31 @@ class Frame(wx.Frame):
             label = self.grid.GetCellValue(row, 1)
             if len(key) > 0 and len(label) > 0:
                 key_dict[key] = label
-            elif any([len(key) > 0, len(label)>0]):
-                wx.MessageBox("Some rows are incomplete, please set them!", "Warning", wx.OK|wx.ICON_ERROR)
+            elif any([len(key) > 0, len(label) > 0]):
+                wx.MessageBox("Some rows are incomplete, please set them!", "Warning", wx.OK | wx.ICON_ERROR)
                 return
 
         self.keymap = key_dict
+        wx.MessageBox("The changes are applied.", "Information")
 
     def onSaveas(self, evt):
-        pass
+        import json
+        file = wx.FileDialog(self, defaultFile="keymap.conf", wildcard="Configure file(*.conf)|*.conf",
+                             style=wx.FD_SAVE)
+        if file.ShowModal() == wx.ID_OK:
+            filepath = file.GetPath()
+            with open(filepath, 'w') as fp:
+                content = json.dumps(self.keymap)
+                fp.write(content)
+
+    def onLoad(self, evt):
+        import json
+        file = wx.FileDialog(self, defaultFile="keymap.conf", wildcard="Configure file(*.conf)|*.conf")
+        if file.ShowModal() == wx.ID_OK:
+            filepath = file.GetPath()
+            with open(filepath, 'r') as fp:
+                self.keymap = json.loads(fp.read())
+                self.grid.update(self.keymap)
 
     def onKeyDown(self, evt):
         key_char = chr(evt.GetUniChar())
@@ -120,8 +143,19 @@ class Grid(wx.grid.Grid):
             self.SetCellValue(row, 1, v)
             row += 1
 
+    def update(self, data):
+        row_num = self.GetNumberRows()
+        if row_num:
+            self.DeleteRows(0, row_num)
+        row = 0
+        for k, v in data.items():
+            self.AppendRows()
+            self.SetCellValue(row, 0, k)
+            self.SetCellValue(row, 1, v)
+            row += 1
+
 
 if __name__ == '__main__':
     app = wx.App(False)
-    Frame('Test')
+    Frame('Simple Annotator for NLP')
     app.MainLoop()
