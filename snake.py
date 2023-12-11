@@ -6,15 +6,20 @@
 # @Email: mianghong@gmail.com
 # @Date: 2016/3/13
 # ==========================================
-import wx
 import os
 import random
+
+import wx
 
 
 class GameFrame(wx.Frame):
     def __init__(self, title, size):
-        super(GameFrame, self).__init__(None, -1, title,
-                                        style=wx.DEFAULT_FRAME_STYLE ^ wx.MAXIMIZE_BOX ^ wx.RESIZE_BORDER)
+        super(GameFrame, self).__init__(
+            None,
+            -1,
+            title,
+            style=wx.DEFAULT_FRAME_STYLE ^ wx.MAXIMIZE_BOX ^ wx.RESIZE_BORDER,
+        )
         self.width = size[0]
         self.height = size[1]
         self.snake = []
@@ -49,15 +54,15 @@ class GameFrame(wx.Frame):
         self.drawAll()
 
     def onClose(self, evt):
-        with open('bestscore.ini', 'w') as fp:
+        with open("bestscore.ini", "w") as fp:
             fp.write(str(self.bestscore))
         self.timer.Stop()
         self.Destroy()
 
     def initGame(self):
         self.score = 0
-        if os.path.exists('bestscore.ini'):
-            self.bestscore = int(open('bestscore.ini').read().strip())
+        if os.path.exists("bestscore.ini"):
+            self.bestscore = int(open("bestscore.ini").read().strip())
         else:
             self.bestscore = 0
         self.snake = [(i, 0) for i in range(5)]
@@ -67,7 +72,13 @@ class GameFrame(wx.Frame):
 
     def newCookie(self):
         x, y = random.choice(
-                [(i, j) for i in range(self.width) for j in range(self.height) if (i, j) not in self.snake])
+            [
+                (i, j)
+                for i in range(self.width)
+                for j in range(self.height)
+                if (i, j) not in self.snake
+            ]
+        )
         self.cookie = (x, y)
 
     def drawAll(self):
@@ -100,19 +111,21 @@ class GameFrame(wx.Frame):
             if x == x1:
                 dc.DrawRectangle(35 + x * 25, 85 + min(y, y1) * 25, 20, 5)
         dc.SetBrush(wx.Brush(wx.BLACK))
-        dc.DrawRectangle(35 + self.snake[-1][0] * 25, 65 + self.snake[-1][1] * 25, 20, 20)
+        dc.DrawRectangle(
+            35 + self.snake[-1][0] * 25, 65 + self.snake[-1][1] * 25, 20, 20
+        )
         dc.SetBrush(wx.Brush((255, 157, 0)))
         dc.DrawCircle(45 + self.cookie[0] * 25, 75 + self.cookie[1] * 25, 15)
 
     def drawLabel(self, dc):
-        dc.SetFont(wx.Font(11, wx.SWISS, wx.NORMAL, wx.NORMAL, face=u'Arial'))
+        dc.SetFont(wx.Font(11, wx.SWISS, wx.NORMAL, wx.NORMAL, faceName="Arial"))
         dc.SetTextForeground((154, 154, 154))
-        dc.DrawText(u'Score: %d' % self.score, 20, 15)
-        text_width = dc.GetTextExtent(u'Best Score: %d' % self.bestscore)[0]
+        dc.DrawText("Score: %d" % self.score, 20, 15)
+        text_width = dc.GetTextExtent("Best Score: %d" % self.bestscore)[0]
         w, h = self.GetClientSize()
-        dc.DrawText(u'Best Score: %d' % self.bestscore, w - 15 - text_width, 15)
-        text_width = dc.GetTextExtent(u'Press SPACE to pause the game.')[0]
-        dc.DrawText(u'Press SPACE to pause the game.', w / 2 - text_width / 2, h - 40)
+        dc.DrawText("Best Score: %d" % self.bestscore, w - 15 - text_width, 15)
+        text_width = dc.GetTextExtent("Press SPACE to pause the game.")[0]
+        dc.DrawText("Press SPACE to pause the game.", w // 2 - text_width // 2, h - 40)
 
     def doMove(self):
         headx, heady = self.snake[-1]
@@ -135,8 +148,12 @@ class GameFrame(wx.Frame):
             self.timer.Stop()
             if self.score > self.bestscore:
                 self.bestscore = self.score
-            if wx.MessageBox(u"GAME OVER, restart?", u"Oops!",
-                             wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
+            if (
+                wx.MessageBox(
+                    "GAME OVER, restart?", "Oops!", wx.YES_NO | wx.ICON_INFORMATION
+                )
+                == wx.YES
+            ):
                 best = self.bestscore
                 self.initGame()
                 self.bestscore = best
@@ -144,24 +161,38 @@ class GameFrame(wx.Frame):
             self.timer.Stop()
             if self.score > self.bestscore:
                 self.bestscore = self.score
-            if wx.MessageBox(u"YOU WIN!, restart?", u"Congratulations!",
-                             wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
+            if (
+                wx.MessageBox(
+                    "YOU WIN!, restart?",
+                    "Congratulations!",
+                    wx.YES_NO | wx.ICON_INFORMATION,
+                )
+                == wx.YES
+            ):
                 best = self.bestscore
                 self.initGame()
                 self.bestscore = best
         self.drawAll()
 
     def isGameOver(self):
-        return any(item == self.snake[-1] for item in self.snake[:-5]) or self.snake[-1][0] not in range(self.width) or \
-               self.snake[-1][1] not in range(self.height)
+        return (
+            any(item == self.snake[-1] for item in self.snake[:-5])
+            or self.snake[-1][0] not in range(self.width)
+            or self.snake[-1][1] not in range(self.height)
+        )
 
     def isWin(self):
         return len(self.snake) == self.width * self.height and all(
-                (i, j) in self.snake for i in range(self.width) for j in range(self.height))
+            (i, j) in self.snake for i in range(self.width) for j in range(self.height)
+        )
 
     def onKeyDown(self, evt):
         keycode = evt.GetKeyCode()
-        if keycode == self.direction or keycode == self.direction +2 or keycode == self.direction - 2:
+        if (
+            keycode == self.direction
+            or keycode == self.direction + 2
+            or keycode == self.direction - 2
+        ):
             return
         if keycode == wx.WXK_SPACE:
             if self.timer.IsRunning():
@@ -177,7 +208,8 @@ class GameFrame(wx.Frame):
     def onTimer(self, evt):
         self.doMove()
 
+
 if __name__ == "__main__":
     app = wx.App(False)
-    GameFrame(u"Snake v0.1 by Frost Ming", (15, 10))
+    GameFrame("Snake v0.1 by Frost Ming", (15, 10))
     app.MainLoop()

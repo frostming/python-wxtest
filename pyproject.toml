@@ -1,0 +1,13 @@
+[project]
+name = ""
+version = ""
+description = ""
+authors = [
+    {name = "Frost Ming", email = "me@frostming.com"},
+]
+dependencies = [
+    "wxpython>=4.2.1",
+]
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
